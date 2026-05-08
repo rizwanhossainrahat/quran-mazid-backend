@@ -1,3 +1,5 @@
+#Live link:https://quran-mazid-server.vercel.app
+
 # Quran API
 
 REST API for the Quran built with Express.js + TypeScript. Uses local JSON files — no database required.
