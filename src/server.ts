@@ -13,7 +13,12 @@ import type { HealthResponse } from "./types/api";
 
 // ─── Validate environment ────────────────────────────────────────────────────
 const PORT = parseInt(process.env["PORT"] ?? "8000", 10);
-const CORS_ORIGIN = process.env["CORS_ORIGIN"] ?? "http://localhost:3000";
+
+// Support comma-separated origins in CORS_ORIGIN env var
+// e.g. CORS_ORIGIN=https://quran-mazid-rose.vercel.app,http://localhost:3000
+const CORS_ORIGIN = process.env["CORS_ORIGIN"]
+  ? process.env["CORS_ORIGIN"].split(",").map((o) => o.trim())
+  : ["http://localhost:3000"];
 
 if (isNaN(PORT)) {
   console.error("Invalid PORT in environment");
@@ -31,9 +36,20 @@ try {
 // ─── App setup ───────────────────────────────────────────────────────────────
 const app = express();
 
-app.use(cors({ origin: CORS_ORIGIN, methods: ["GET", "OPTIONS"] }));
+app.use(cors({
+  origin: true, // reflect request origin — works for all origins including localhost
+  methods: ["GET", "OPTIONS"],
+  credentials: true,
+}));
 app.use(morgan(process.env["NODE_ENV"] === "production" ? "combined" : "dev"));
 app.use(express.json());
+
+app.get("/",(req,res)=>{
+  res.status(200).json({
+    success : true,
+    message : "Server is running"
+  });
+});
 
 // ─── Health check ────────────────────────────────────────────────────────────
 app.get("/api/health", (_req, res) => {
